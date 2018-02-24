@@ -30,7 +30,7 @@ mkdir -p "$CODE_PATH/../build"
 pushd "$CODE_PATH/../build"
 
 
-$CXX $CommonFlags ../code/fastlife.cpp $CommonLinkerFlags -o fastlife-x86_64
+$CXX $CommonFlags -O3 ../code/fastlife.cpp $CommonLinkerFlags -o fastlife-x86_64
 
 popd
 
