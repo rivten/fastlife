@@ -12,9 +12,9 @@
 typedef bool b8;
 
 global_variable b8 GlobalRunning = true;
-global_variable u32 GlobalWindowWidth = 1024 + 128 + 64 + 32 + 16 + 8;
-global_variable u32 GlobalWindowHeight = 512 + 128 + 64;
-global_variable u32 TileSize = 2;
+global_variable u32 GlobalWindowWidth = 1024 + 256 + 16;
+global_variable u32 GlobalWindowHeight = 512 + 128 + 64 + 4;
+global_variable u32 TileSize = 1;
 global_variable u32 UniverseWidth = GlobalWindowWidth / TileSize;
 global_variable u32 UniverseHeight = GlobalWindowHeight / TileSize;
 
@@ -73,7 +73,7 @@ int main(int ArgumentCount, char** Arguments)
 	float GameUpdateHz = (MonitorRefreshHz / 2.0f);
 	u32 TargetMSPerFrame = (u32)(1000.0f / GameUpdateHz);
 
-	random_series Entropy = RandomSeed(0);
+	random_series Entropy = RandomSeed(1234);
 
 	u32 SquareCount = UniverseWidth * UniverseHeight;
 	u8* Universes = AllocateArray(u8, 2 * SquareCount);
@@ -99,6 +99,9 @@ int main(int ArgumentCount, char** Arguments)
 		}
 #endif
 	}
+
+	u32 CameraPosX = 0;
+	u32 CameraPosY = 0;
 
 	while(GlobalRunning)
 	{
@@ -154,22 +157,46 @@ int main(int ArgumentCount, char** Arguments)
 		SDL_RenderClear(Renderer);
 
 		SDL_SetRenderDrawColor(Renderer, 0, 255, 0, 255);
-		for(u32 SquareIndex = 0; SquareIndex < SquareCount; ++SquareIndex)
+		for(u32 Y = 0; Y < GlobalWindowHeight; Y += TileSize)
 		{
-			if(CurrentUniverse[SquareIndex] == 1)
+			for(u32 X = 0; X < GlobalWindowWidth; X += TileSize)
 			{
+				s32 UniverseX = CameraPosX + (X / TileSize);
+				s32 UniverseY = CameraPosY + (Y / TileSize);
+				if(UniverseX >= 0 && u32(UniverseX) < UniverseWidth &&
+						UniverseY >= 0 && u32(UniverseY) < UniverseHeight)
+				{
+					u32 SquareIndex = UniverseX + UniverseY * UniverseWidth;
+					if(CurrentUniverse[SquareIndex] == 1)
+					{
 #if 0
-				SDL_RenderDrawPoint(Renderer,
-						SquareIndex % GlobalWindowWidth,
-						SquareIndex / GlobalWindowWidth);
+						SDL_RenderDrawPoint(Renderer,
+								SquareIndex % GlobalWindowWidth,
+								SquareIndex / GlobalWindowWidth);
 #else
-				SDL_Rect TileRect = {};
-				TileRect.x = (SquareIndex % UniverseWidth) * TileSize;
-				TileRect.y = (SquareIndex / UniverseWidth) * TileSize;
-				TileRect.w = TileSize;
-				TileRect.h = TileSize;
-				SDL_RenderDrawRect(Renderer, &TileRect);
+						SDL_Rect TileRect = {};
+						TileRect.x = X;
+						TileRect.y = Y;
+						TileRect.w = TileSize;
+						TileRect.h = TileSize;
+						SDL_RenderFillRect(Renderer, &TileRect);
 #endif
+					}
+				}
+				else
+				{
+					// TODO(hugo): Another possibility: draw a grey
+					// background and draw in white each time 
+					// there is no cell
+					SDL_SetRenderDrawColor(Renderer, 100, 100, 100, 255);
+					SDL_Rect TileRect = {};
+					TileRect.x = X;
+					TileRect.y = Y;
+					TileRect.w = TileSize;
+					TileRect.h = TileSize;
+					SDL_RenderFillRect(Renderer, &TileRect);
+					SDL_SetRenderDrawColor(Renderer, 0, 255, 0, 255);
+				}
 			}
 		}
 
