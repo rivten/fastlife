@@ -15,11 +15,33 @@ global_variable b8 GlobalRunning = true;
 global_variable u32 GlobalWindowWidth = 1024 + 256 + 16;
 global_variable u32 GlobalWindowHeight = 512 + 128 + 64 + 4;
 global_variable u32 TileSize = 1;
+#if 0
+global_variable u32 UniverseWidth = 1 << 12;
+global_variable u32 UniverseHeight = 1 << 12;
+#else
 global_variable u32 UniverseWidth = 4 * GlobalWindowWidth;
 global_variable u32 UniverseHeight = 4 * GlobalWindowHeight;
+#endif
 global_variable u32 CameraPosDelta = 20;
 
-#define GetUniverseTile(Universe, X, Y) (Universe)[(X) + (Y) * UniverseWidth]
+inline u8
+GetUniverseTile(u8* Universe, u32 Index)
+{
+	u8 Result = 0;
+
+	u8 UniverseBatch = Universe[Index / 8];
+	Result = (UniverseBatch >> (Index % 8)) & 1;
+
+	return(Result);
+}
+
+inline u8
+GetUniverseTile(u8* Universe, u32 X, u32 Y)
+{
+	u32 Index = X + Y * UniverseWidth;
+	u8 Result = GetUniverseTile(Universe, Index);
+	return(Result);
+}
 
 inline u8
 GetNeighborCount(u8* Universe, u32 Index)
@@ -27,22 +49,38 @@ GetNeighborCount(u8* Universe, u32 Index)
 	u8 Count = 0;
 	u32 IndexX = Index % UniverseWidth;
 	u32 IndexY = Index / UniverseWidth;
-	for(s32 Y = -1; Y <= 1; ++Y)
-	{
-		for(s32 X = -1; X <= 1; ++X)
-		{
-			if(Y != 0 || X != 0)
-			{
-				if(GetUniverseTile(Universe,
-							(IndexX + X) % UniverseWidth,
-							(IndexY + Y) % UniverseHeight)
-						== 1)
-				{
-					++Count;
-				}
-			}
-		}
-	}
+
+	Count += GetUniverseTile(Universe,
+			(IndexX - 1) % UniverseWidth,
+			(IndexY - 1) % UniverseHeight);
+
+	Count += GetUniverseTile(Universe,
+			(IndexX) % UniverseWidth,
+			(IndexY - 1) % UniverseHeight);
+
+	Count += GetUniverseTile(Universe,
+			(IndexX + 1) % UniverseWidth,
+			(IndexY - 1) % UniverseHeight);
+
+	Count += GetUniverseTile(Universe,
+			(IndexX - 1) % UniverseWidth,
+			(IndexY) % UniverseHeight);
+
+	Count += GetUniverseTile(Universe,
+			(IndexX + 1) % UniverseWidth,
+			(IndexY) % UniverseHeight);
+
+	Count += GetUniverseTile(Universe,
+			(IndexX - 1) % UniverseWidth,
+			(IndexY + 1) % UniverseHeight);
+
+	Count += GetUniverseTile(Universe,
+			(IndexX) % UniverseWidth,
+			(IndexY + 1) % UniverseHeight);
+
+	Count += GetUniverseTile(Universe,
+			(IndexX + 1) % UniverseWidth,
+			(IndexY + 1) % UniverseHeight);
 	return(Count);
 }
 
@@ -77,28 +115,16 @@ int main(int ArgumentCount, char** Arguments)
 	random_series Entropy = RandomSeed(1234);
 
 	u32 SquareCount = UniverseWidth * UniverseHeight;
-	u8* Universes = AllocateArray(u8, 2 * SquareCount);
+	Assert(SquareCount % 8 == 0);
+	u32 BatchCount = SquareCount / 8;
+	u8* Universes = AllocateArray(u8, 2 * BatchCount);
 	u8* CurrentUniverse = Universes;
-	u8* NextUniverse = Universes + SquareCount;
+	u8* NextUniverse = Universes + BatchCount;
 
 	// NOTE(hugo): Universe random init
-	for(u32 SquareIndex = 0; SquareIndex < SquareCount; ++SquareIndex)
+	for(u32 Index = 0; Index < BatchCount; ++Index)
 	{
-#if 1
-		u32 Random = RandomNextU32(&Entropy);
-		CurrentUniverse[SquareIndex] = (Random & 0x00000001 != 0);
-#else
-		if(SquareIndex == 1000 ||
-				SquareIndex == 1001 ||
-				SquareIndex == 1002)
-		{
-			CurrentUniverse[SquareIndex] = 1;
-		}
-		else
-		{
-			CurrentUniverse[SquareIndex] = 0;
-		}
-#endif
+		CurrentUniverse[Index] = u8(RandomChoice(&Entropy, 256));
 	}
 
 	u32 CameraPosX = 0;
@@ -143,22 +169,27 @@ int main(int ArgumentCount, char** Arguments)
 
 		// NOTE(hugo): Update
 		// {
-		for(u32 SquareIndex = 0; SquareIndex < SquareCount; ++SquareIndex)
+		for(u32 Index = 0; Index < BatchCount; ++Index)
 		{
-			NextUniverse[SquareIndex] = CurrentUniverse[SquareIndex];
+			// NOTE(hugo): Copy all eight values
+			NextUniverse[Index] = CurrentUniverse[Index];
 
-			u8 NeighborCount = GetNeighborCount(CurrentUniverse, SquareIndex);
-			if(CurrentUniverse[SquareIndex] == 0)
+			for(u8 BitIndex = 0; BitIndex < 8; ++BitIndex)
 			{
-				if(NeighborCount == 3)
+				u32 SquareIndex = Index * 8 + BitIndex;
+				u8 NeighborCount = GetNeighborCount(CurrentUniverse, SquareIndex);
+				if(GetUniverseTile(CurrentUniverse, SquareIndex) == 0)
 				{
-					NextUniverse[SquareIndex] = 1;
+					if(NeighborCount == 3)
+					{
+						NextUniverse[Index] |= (1 << BitIndex);
+					}
 				}
-			}
-			else if(CurrentUniverse[SquareIndex] == 1 &&
-					(NeighborCount < 2 || NeighborCount > 3))
-			{
-				NextUniverse[SquareIndex] = 0;
+				else if(GetUniverseTile(CurrentUniverse, SquareIndex) == 1 &&
+						(NeighborCount < 2 || NeighborCount > 3))
+				{
+					NextUniverse[Index] &= ~(1 << BitIndex);
+				}
 			}
 		}
 		// }
@@ -188,20 +219,14 @@ int main(int ArgumentCount, char** Arguments)
 						UniverseY >= 0 && u32(UniverseY) < UniverseHeight)
 				{
 					u32 SquareIndex = UniverseX + UniverseY * UniverseWidth;
-					if(CurrentUniverse[SquareIndex] == 1)
+					if(GetUniverseTile(CurrentUniverse, SquareIndex) == 1)
 					{
-#if 0
-						SDL_RenderDrawPoint(Renderer,
-								SquareIndex % GlobalWindowWidth,
-								SquareIndex / GlobalWindowWidth);
-#else
 						SDL_Rect TileRect = {};
 						TileRect.x = X;
 						TileRect.y = Y;
 						TileRect.w = TileSize;
 						TileRect.h = TileSize;
 						SDL_RenderFillRect(Renderer, &TileRect);
-#endif
 					}
 				}
 				else
