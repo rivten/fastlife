@@ -15,8 +15,9 @@ global_variable b8 GlobalRunning = true;
 global_variable u32 GlobalWindowWidth = 1024 + 256 + 16;
 global_variable u32 GlobalWindowHeight = 512 + 128 + 64 + 4;
 global_variable u32 TileSize = 1;
-global_variable u32 UniverseWidth = GlobalWindowWidth / TileSize;
-global_variable u32 UniverseHeight = GlobalWindowHeight / TileSize;
+global_variable u32 UniverseWidth = 4 * GlobalWindowWidth;
+global_variable u32 UniverseHeight = 4 * GlobalWindowHeight;
+global_variable u32 CameraPosDelta = 20;
 
 #define GetUniverseTile(Universe, X, Y) (Universe)[(X) + (Y) * UniverseWidth]
 
@@ -118,6 +119,26 @@ int main(int ArgumentCount, char** Arguments)
 					{
 					} break;
 			}
+		}
+
+		s32 KeyCount = 0;
+		const u8* KeyboardState = SDL_GetKeyboardState(&KeyCount);
+
+		if(KeyboardState[SDL_SCANCODE_UP])
+		{
+			CameraPosY -= CameraPosDelta;
+		}
+		if(KeyboardState[SDL_SCANCODE_DOWN])
+		{
+			CameraPosY += CameraPosDelta;
+		}
+		if(KeyboardState[SDL_SCANCODE_LEFT])
+		{
+			CameraPosX -= CameraPosDelta;
+		}
+		if(KeyboardState[SDL_SCANCODE_RIGHT])
+		{
+			CameraPosX += CameraPosDelta;
 		}
 
 		// NOTE(hugo): Update
