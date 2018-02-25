@@ -41,8 +41,8 @@ GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 	u8 Count = 0;
 
 	{
-		u32 X = IndexX - 1;
-		u32 Y = IndexY - 1;
+		s32 X = IndexX - 1;
+		s32 Y = IndexY - 1;
 		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
 		u8 UniverseBatch = Universe[Index / 8];
 		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
@@ -50,8 +50,8 @@ GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 	}
 
 	{
-		u32 X = IndexX;
-		u32 Y = IndexY - 1;
+		s32 X = IndexX;
+		s32 Y = IndexY - 1;
 		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
 		u8 UniverseBatch = Universe[Index / 8];
 		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
@@ -59,8 +59,8 @@ GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 	}
 
 	{
-		u32 X = IndexX + 1;
-		u32 Y = IndexY - 1;
+		s32 X = IndexX + 1;
+		s32 Y = IndexY - 1;
 		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
 		u8 UniverseBatch = Universe[Index / 8];
 		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
@@ -68,8 +68,8 @@ GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 	}
 
 	{
-		u32 X = IndexX - 1;
-		u32 Y = IndexY;
+		s32 X = IndexX - 1;
+		s32 Y = IndexY;
 		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
 		u8 UniverseBatch = Universe[Index / 8];
 		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
@@ -77,8 +77,8 @@ GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 	}
 
 	{
-		u32 X = IndexX + 1;
-		u32 Y = IndexY;
+		s32 X = IndexX + 1;
+		s32 Y = IndexY;
 		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
 		u8 UniverseBatch = Universe[Index / 8];
 		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
@@ -86,8 +86,8 @@ GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 	}
 
 	{
-		u32 X = IndexX - 1;
-		u32 Y = IndexY + 1;
+		s32 X = IndexX - 1;
+		s32 Y = IndexY + 1;
 		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
 		u8 UniverseBatch = Universe[Index / 8];
 		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
@@ -95,8 +95,8 @@ GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 	}
 
 	{
-		u32 X = IndexX;
-		u32 Y = IndexY + 1;
+		s32 X = IndexX;
+		s32 Y = IndexY + 1;
 		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
 		u8 UniverseBatch = Universe[Index / 8];
 		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
@@ -104,8 +104,8 @@ GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 	}
 
 	{
-		u32 X = IndexX + 1;
-		u32 Y = IndexY + 1;
+		s32 X = IndexX + 1;
+		s32 Y = IndexY + 1;
 		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
 		u8 UniverseBatch = Universe[Index / 8];
 		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
