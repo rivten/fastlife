@@ -9,6 +9,12 @@
 #include <SDL2/SDL.h>
 #endif
 
+#define CYCLES 0
+#if CYCLES
+#include <x86intrin.h>
+global_variable u64 GlobalGetNeighbourCountCycleCountPerFrame = 0;
+#endif
+
 typedef bool b8;
 
 global_variable b8 GlobalRunning = true;
@@ -38,6 +44,10 @@ GetUniverseTile(u8* Universe, u32 Index)
 inline u8
 GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 {
+#if CYCLES
+	u64 BeginCycleCount = _rdtsc();
+#endif
+
 	u8 Count = 0;
 
 	{
@@ -111,6 +121,12 @@ GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
 		Count += Result;
 	}
+
+#if CYCLES
+	u64 EndCycleCount = _rdtsc();
+	GlobalGetNeighbourCountCycleCountPerFrame += (EndCycleCount - BeginCycleCount);
+#endif
+
 	return(Count);
 }
 
@@ -312,6 +328,12 @@ int main(int ArgumentCount, char** Arguments)
 		{
 			// TODO(hugo) : Missed framerate
 		}
+
+#if CYCLES
+		double CyclesPerCall = float(GlobalGetNeighbourCountCycleCountPerFrame) / float(SquareCount);
+		printf("%lu cycles -- %f cycles/call (avg)\n", GlobalGetNeighbourCountCycleCountPerFrame, CyclesPerCall);
+		GlobalGetNeighbourCountCycleCountPerFrame = 0;
+#endif
 
 		// NOTE(hugo) : This must be at the very end
 		LastCounter = SDL_GetTicks();
