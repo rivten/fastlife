@@ -12,7 +12,7 @@ fi
 
 $CTIME_EXEC -begin "$CTIME_TIMING_FILE"
 
-CommonFlags="-g -std=c++11 -Werror -Wall -Wextra -Wcast-align -Wmissing-noreturn -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-include-dirs -Wno-old-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-promo -Wstrict-overflow=5 -Wundef -Wno-unused -Wno-variadic-macros -Wno-parentheses -fdiagnostics-show-option -Wno-write-strings -Wno-absolute-value -Wno-cast-align -Wno-unused-parameter -lm"
+CommonFlags="-g -std=c++11 -Werror -Wall -Wextra -Wcast-align -Wmissing-noreturn -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-include-dirs -Wno-old-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-promo -Wstrict-overflow=5 -Wundef -Wno-unused -Wno-variadic-macros -Wno-parentheses -fdiagnostics-show-option -Wno-write-strings -Wno-absolute-value -Wno-cast-align -Wno-unused-parameter"
 CommonFlags+=" -I ../../rivten/ -I ../../stb/ -I ../../imgui/"
 
 if [ -n "$(command -v clang++)" ]
@@ -29,8 +29,10 @@ CommonLinkerFlags="-l SDL2 -l SDL2_ttf -l GL"
 mkdir -p "$CODE_PATH/../build"
 pushd "$CODE_PATH/../build"
 
+AsmOutput="-S -mllvm --x86-asm-syntax=intel"
 
 $CXX $CommonFlags -O3 ../code/fastlife.cpp $CommonLinkerFlags -o fastlife-x86_64
+# $CXX $CommonFlags $AsmOutput -O3 ../code/fastlife.cpp
 
 popd
 
