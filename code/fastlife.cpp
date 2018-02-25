@@ -251,9 +251,14 @@ int main(int ArgumentCount, char** Arguments)
 
 		u32 WorkMSElapsedForFrame = SDL_GetTicks() - LastCounter;
 
+		float GenerationPerSecond = 1000.0f / float(WorkMSElapsedForFrame);
+		u32 CellComputationsPerSecond = u32(GenerationPerSecond * UniverseWidth * UniverseHeight);
+		u32 MillionCellComputationsPerSecond = CellComputationsPerSecond / 1000000;
+
 		// NOTE(hugo) : Setting the window title
 		char WindowTitle[128];
-		sprintf(WindowTitle, "FastLife @ rivten - %ims", WorkMSElapsedForFrame);
+		sprintf(WindowTitle, "FastLife @ rivten - %ims - %i (%iM) cell-computed per seconds", WorkMSElapsedForFrame,
+				CellComputationsPerSecond, MillionCellComputationsPerSecond);
 		SDL_SetWindowTitle(Window, WindowTitle);
 
 		if(WorkMSElapsedForFrame < TargetMSPerFrame)
