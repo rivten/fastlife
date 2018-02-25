@@ -36,52 +36,81 @@ GetUniverseTile(u8* Universe, u32 Index)
 }
 
 inline u8
-GetUniverseTile(u8* Universe, u32 X, u32 Y)
-{
-	u32 Index = X + Y * UniverseWidth;
-	u8 Result = GetUniverseTile(Universe, Index);
-	return(Result);
-}
-
-inline u8
 GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 {
 	u8 Count = 0;
 
-#if 1
-	Count += GetUniverseTile(Universe,
-			(IndexX - 1) % UniverseWidth,
-			(IndexY - 1) % UniverseHeight);
+	{
+		u32 X = IndexX - 1;
+		u32 Y = IndexY - 1;
+		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
+		u8 UniverseBatch = Universe[Index / 8];
+		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
+		Count += Result;
+	}
 
-	Count += GetUniverseTile(Universe,
-			(IndexX) % UniverseWidth,
-			(IndexY - 1) % UniverseHeight);
+	{
+		u32 X = IndexX;
+		u32 Y = IndexY - 1;
+		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
+		u8 UniverseBatch = Universe[Index / 8];
+		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
+		Count += Result;
+	}
 
-	Count += GetUniverseTile(Universe,
-			(IndexX + 1) % UniverseWidth,
-			(IndexY - 1) % UniverseHeight);
+	{
+		u32 X = IndexX + 1;
+		u32 Y = IndexY - 1;
+		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
+		u8 UniverseBatch = Universe[Index / 8];
+		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
+		Count += Result;
+	}
 
-	Count += GetUniverseTile(Universe,
-			(IndexX - 1) % UniverseWidth,
-			(IndexY) % UniverseHeight);
+	{
+		u32 X = IndexX - 1;
+		u32 Y = IndexY;
+		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
+		u8 UniverseBatch = Universe[Index / 8];
+		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
+		Count += Result;
+	}
 
-	Count += GetUniverseTile(Universe,
-			(IndexX + 1) % UniverseWidth,
-			(IndexY) % UniverseHeight);
+	{
+		u32 X = IndexX + 1;
+		u32 Y = IndexY;
+		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
+		u8 UniverseBatch = Universe[Index / 8];
+		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
+		Count += Result;
+	}
 
-	Count += GetUniverseTile(Universe,
-			(IndexX - 1) % UniverseWidth,
-			(IndexY + 1) % UniverseHeight);
+	{
+		u32 X = IndexX - 1;
+		u32 Y = IndexY + 1;
+		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
+		u8 UniverseBatch = Universe[Index / 8];
+		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
+		Count += Result;
+	}
 
-	Count += GetUniverseTile(Universe,
-			(IndexX) % UniverseWidth,
-			(IndexY + 1) % UniverseHeight);
+	{
+		u32 X = IndexX;
+		u32 Y = IndexY + 1;
+		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
+		u8 UniverseBatch = Universe[Index / 8];
+		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
+		Count += Result;
+	}
 
-	Count += GetUniverseTile(Universe,
-			(IndexX + 1) % UniverseWidth,
-			(IndexY + 1) % UniverseHeight);
-#else
-#endif
+	{
+		u32 X = IndexX + 1;
+		u32 Y = IndexY + 1;
+		u32 Index = (X % UniverseWidth) + (Y % UniverseHeight) * UniverseWidth;
+		u8 UniverseBatch = Universe[Index / 8];
+		u8 Result = (UniverseBatch >> (Index % 8)) & 1;
+		Count += Result;
+	}
 	return(Count);
 }
 
