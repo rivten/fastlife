@@ -44,12 +44,11 @@ GetUniverseTile(u8* Universe, u32 X, u32 Y)
 }
 
 inline u8
-GetNeighborCount(u8* Universe, u32 Index)
+GetNeighborCount(u8* Universe, u32 IndexX, u32 IndexY)
 {
 	u8 Count = 0;
-	u32 IndexX = Index % UniverseWidth;
-	u32 IndexY = Index / UniverseWidth;
 
+#if 1
 	Count += GetUniverseTile(Universe,
 			(IndexX - 1) % UniverseWidth,
 			(IndexY - 1) % UniverseHeight);
@@ -81,6 +80,8 @@ GetNeighborCount(u8* Universe, u32 Index)
 	Count += GetUniverseTile(Universe,
 			(IndexX + 1) % UniverseWidth,
 			(IndexY + 1) % UniverseHeight);
+#else
+#endif
 	return(Count);
 }
 
@@ -169,6 +170,8 @@ int main(int ArgumentCount, char** Arguments)
 
 		// NOTE(hugo): Update
 		// {
+		u32 UniverseX = 0;
+		u32 UniverseY = 0;
 		for(u32 Index = 0; Index < BatchCount; ++Index)
 		{
 			// NOTE(hugo): Copy all eight values
@@ -176,16 +179,23 @@ int main(int ArgumentCount, char** Arguments)
 
 			for(u8 BitIndex = 0; BitIndex < 8; ++BitIndex)
 			{
-				u32 SquareIndex = Index * 8 + BitIndex;
-				u8 NeighborCount = GetNeighborCount(CurrentUniverse, SquareIndex);
-				if(GetUniverseTile(CurrentUniverse, SquareIndex) == 0)
+				++UniverseX;
+				if(UniverseX == UniverseWidth)
+				{
+					UniverseX = 0;
+					++UniverseY;
+				}
+				u8 NeighborCount = GetNeighborCount(CurrentUniverse, UniverseX, UniverseY);
+				u8 UniverseBatch = CurrentUniverse[Index];
+				u8 TileMask = (1 << BitIndex);
+				if((UniverseBatch & TileMask) == 0)
 				{
 					if(NeighborCount == 3)
 					{
 						NextUniverse[Index] |= (1 << BitIndex);
 					}
 				}
-				else if(GetUniverseTile(CurrentUniverse, SquareIndex) == 1 &&
+				else if(((UniverseBatch & TileMask) != 0) &&
 						(NeighborCount < 2 || NeighborCount > 3))
 				{
 					NextUniverse[Index] &= ~(1 << BitIndex);
